@@ -1,5 +1,6 @@
 import { Component } from 'solid-js';
 import styles from './DoomsdayButton.module.css';
+import TimerRing from './TimerRing';
 
 interface DoomsdayButtonProps {
   isRunning: boolean;
@@ -20,11 +21,11 @@ const DoomsdayButton: Component<DoomsdayButtonProps> = (props) => {
             </span>
           </div>
         </div>
-        <div class={styles.buttonRing}></div>
         <div class={styles.buttonWarning}>
           <span>{props.isRunning ? 'SYSTEM ACTIVE' : 'SYSTEM READY'}</span>
         </div>
       </button>
+      <TimerRing isActive={props.isRunning} />
     </div>
   );
 };

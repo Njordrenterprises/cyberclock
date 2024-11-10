@@ -1,12 +1,12 @@
 .doomsdayContainer {
-  margin: 2rem auto;
+  margin: 3rem auto;
   text-align: center;
 }
 
 .doomsdayButton {
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 300px;
+  height: 300px;
   border: none;
   background: none;
   cursor: pointer;
@@ -18,11 +18,11 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 150px;
-  height: 150px;
+  width: 225px;
+  height: 225px;
   background: radial-gradient(circle, #ff003c 0%, #800020 100%);
   border-radius: 50%;
-  box-shadow: 0 0 30px rgba(255, 0, 60, 0.6);
+  box-shadow: 0 0 50px rgba(255, 0, 60, 0.6);
   transition: all 0.3s ease;
 }
 
@@ -31,11 +31,11 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 130px;
-  height: 130px;
+  width: 195px;
+  height: 195px;
   background: #ff003c;
   border-radius: 50%;
-  border: 4px solid rgba(0, 0, 0, 0.3);
+  border: 6px solid rgba(0, 0, 0, 0.3);
 }
 
 .buttonText {
@@ -45,49 +45,74 @@
   transform: translate(-50%, -50%);
   color: white;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 1.5rem;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  font-size: 2.5rem;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
   white-space: nowrap;
-}
-
-.buttonRing {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 180px;
-  height: 180px;
-  border: 8px solid #ff003c;
-  border-radius: 50%;
-  opacity: 0.5;
 }
 
 .buttonWarning {
   position: absolute;
-  bottom: -30px;
+  bottom: -40px;
   left: 50%;
   transform: translateX(-50%);
   color: #ff003c;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 1rem;
+  font-size: 1.5rem;
   white-space: nowrap;
 }
 
 .active .buttonCore {
-  animation: pulse 1s infinite;
+  animation: pulse 1s infinite, electricity 0.5s infinite;
   background: radial-gradient(circle, #00ff41 0%, #008020 100%);
-}
-
-.active .buttonRing {
-  border-color: #00ff41;
 }
 
 .active .buttonWarning {
   color: #00ff41;
+  animation: textFlicker 0.3s infinite;
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 30px rgba(0, 255, 65, 0.6); }
-  50% { box-shadow: 0 0 50px rgba(0, 255, 65, 0.8); }
-  100% { box-shadow: 0 0 30px rgba(0, 255, 65, 0.6); }
+  0% { box-shadow: 0 0 50px rgba(0, 255, 65, 0.6); }
+  50% { box-shadow: 0 0 100px rgba(0, 255, 65, 0.8); }
+  100% { box-shadow: 0 0 50px rgba(0, 255, 65, 0.6); }
 }
+
+@keyframes textFlicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+@media (max-width: 500px) {
+  .doomsdayButton {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .buttonCore {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .buttonInner {
+    width: 130px;
+    height: 130px;
+    border-width: 4px;
+  }
+  
+  .buttonText {
+    font-size: 1.5rem;
+  }
+  
+  .buttonWarning {
+    font-size: 1rem;
+    bottom: -30px;
+  }
+  
+  .buttonRing::before,
+  .buttonRing::after {
+    font-size: 18px;
+    transform-origin: 100px 0;
+  }
+}
+
