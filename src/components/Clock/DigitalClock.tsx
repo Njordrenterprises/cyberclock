@@ -1,12 +1,29 @@
-import { Component, createSignal, onCleanup } from 'solid-js';
+import { Component, createSignal, createEffect, onCleanup } from 'solid-js';
 import styles from './DigitalClock.module.css';
 
-const DigitalClock: Component = () => {
+interface DigitalClockProps {
+  isRunning: boolean;
+}
+
+const DigitalClock: Component<DigitalClockProps> = (props) => {
   const [time, setTime] = createSignal(new Date());
+  const [intervalId, setIntervalId] = createSignal<ReturnType<typeof setInterval> | null>(null);
 
-  const timer = setInterval(() => setTime(new Date()), 1000);
+  createEffect(() => {
+    if (props.isRunning && !intervalId()) {
+      const id = setInterval(() => setTime(new Date()), 1000);
+      setIntervalId(id);
+    } else if (!props.isRunning && intervalId()) {
+      clearInterval(intervalId()!);
+      setIntervalId(null);
+    }
+  });
 
-  onCleanup(() => clearInterval(timer));
+  onCleanup(() => {
+    if (intervalId()) {
+      clearInterval(intervalId()!);
+    }
+  });
 
   return (
     <div class={styles.clockContainer}>

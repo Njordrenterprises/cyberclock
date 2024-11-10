@@ -1,0 +1,27 @@
+.container {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--neon-blue);
+  border-radius: 4px;
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 800px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+}
+
+.title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 3rem;
+  color: var(--neon-blue);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.content {
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--terminal-green);
+  font-size: 1.2rem;
+  line-height: 1.6;
+}

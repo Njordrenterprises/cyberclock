@@ -1,0 +1,38 @@
+.controlsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--neon-blue);
+  border-radius: 4px;
+  margin: 1rem auto;
+  max-width: 800px;
+}
+
+.controlButton {
+  background: transparent;
+  border: 1px solid var(--neon-blue);
+  color: var(--neon-blue);
+  padding: 0.8rem 2rem;
+  font-family: 'Share Tech Mono', monospace;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  border-radius: 4px;
+  text-decoration: none;
+  min-width: 120px;
+  text-align: center;
+}
+
+.controlButton:hover {
+  background: var(--neon-blue);
+  color: black;
+  box-shadow: 0 0 15px var(--neon-blue);
+}
+
+.active {
+  background: var(--neon-blue);
+  color: black;
+  box-shadow: 0 0 15px var(--neon-blue);
+}

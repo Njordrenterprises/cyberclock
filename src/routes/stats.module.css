@@ -1,0 +1,5 @@
+@import './shared.module.css';
+
+.statsContainer {
+  composes: container;
+}
