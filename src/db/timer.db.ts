@@ -14,7 +14,7 @@ interface DbAdapter {
   getTotalTime(): { total: number } | null;
 }
 
-// Memory store for development
+// Memory store for development and client-side
 class MemoryAdapter implements DbAdapter {
   private store: Map<number, TimeEntry> = new Map();
   private lastId = 0;
@@ -25,22 +25,30 @@ class MemoryAdapter implements DbAdapter {
 
   private initializeFromStorage(): void {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('timerEntries');
-      if (stored) {
-        const entries = JSON.parse(stored);
-        entries.forEach(([id, entry]: [number, TimeEntry]) => {
-          this.store.set(id, entry);
-          this.lastId = Math.max(this.lastId, id);
-        });
+      try {
+        const stored = localStorage.getItem('timerEntries');
+        if (stored) {
+          const entries = JSON.parse(stored);
+          entries.forEach(([id, entry]: [number, TimeEntry]) => {
+            this.store.set(id, entry);
+            this.lastId = Math.max(this.lastId, id);
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load from storage:', error);
       }
     }
   }
 
   private persistToStorage(): void {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('timerEntries', 
-        JSON.stringify(Array.from(this.store.entries()))
-      );
+      try {
+        localStorage.setItem('timerEntries', 
+          JSON.stringify(Array.from(this.store.entries()))
+        );
+      } catch (error) {
+        console.error('Failed to persist to storage:', error);
+      }
     }
   }
 
@@ -79,72 +87,61 @@ class MemoryAdapter implements DbAdapter {
   }
 }
 
-// Database factory with environment detection
-const createDbAdapter = async (): Promise<DbAdapter> => {
-  const isServer = typeof window === 'undefined';
-  const isBun = isServer && typeof process !== 'undefined' && process.versions?.bun;
+// Use MemoryAdapter by default
+let dbAdapter: DbAdapter = new MemoryAdapter();
 
-  if (isBun) {
-    try {
-      const { Database } = await import('./sqlite');
-      const db = new Database('timer.db', { 
-        readwrite: true,
-        create: true 
-      });
+// Only try to load SQLite in Bun environment
+if (typeof process !== 'undefined' && process.versions?.bun) {
+  try {
+    const { Database } = require('bun:sqlite');
+    const db = new Database('timer.db', { 
+      readwrite: true,
+      create: true 
+    });
 
-      // Initialize database with run instead of exec
-      db.run("PRAGMA journal_mode = WAL;");
-      
-      db.run(`
-        CREATE TABLE IF NOT EXISTS time_entries (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          start_time INTEGER NOT NULL,
-          end_time INTEGER,
-          duration INTEGER,
-          created_at INTEGER DEFAULT (unixepoch())
-        )
-      `);
+    db.run("PRAGMA journal_mode = WAL;");
+    
+    db.run(`
+      CREATE TABLE IF NOT EXISTS time_entries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        start_time INTEGER NOT NULL,
+        end_time INTEGER,
+        duration INTEGER,
+        created_at INTEGER DEFAULT (unixepoch())
+      )
+    `);
 
-      db.run(`
-        CREATE INDEX IF NOT EXISTS idx_time_entries_start_time 
-        ON time_entries(start_time)
-      `);
-
-      return {
-        startTimer: () => {
-          return db.run(
-            'INSERT INTO time_entries (start_time) VALUES (?)',
-            [Date.now()]
-          ).lastInsertRowId;
-        },
-        stopTimer: (id: number) => {
-          const end_time = Date.now();
-          db.run(
-            `UPDATE time_entries 
-             SET end_time = ?, 
-                 duration = ? - start_time 
-             WHERE id = ?`,
-            [end_time, end_time, id]
-          );
-        },
-        getLastSession: () => {
-          return db.query(
-            'SELECT * FROM time_entries ORDER BY id DESC LIMIT 1'
-          ).get() as TimeEntry | null;
-        },
-        getTotalTime: () => {
-          return db.query(
-            'SELECT SUM(duration) as total FROM time_entries'
-          ).get() as { total: number } | null;
-        }
-      };
-    } catch (error) {
-      console.error('Failed to initialize SQLite:', error);
-      return new MemoryAdapter();
-    }
+    dbAdapter = {
+      startTimer: () => {
+        return db.run(
+          'INSERT INTO time_entries (start_time) VALUES (?)',
+          [Date.now()]
+        ).lastInsertRowId;
+      },
+      stopTimer: (id: number) => {
+        const end_time = Date.now();
+        db.run(
+          `UPDATE time_entries 
+           SET end_time = ?, 
+               duration = ? - start_time 
+           WHERE id = ?`,
+          [end_time, end_time, id]
+        );
+      },
+      getLastSession: () => {
+        return db.query(
+          'SELECT * FROM time_entries ORDER BY id DESC LIMIT 1'
+        ).get() as TimeEntry | null;
+      },
+      getTotalTime: () => {
+        return db.query(
+          'SELECT SUM(duration) as total FROM time_entries'
+        ).get() as { total: number } | null;
+      }
+    };
+  } catch (error) {
+    console.error('Failed to initialize SQLite:', error);
   }
+}
 
-  return new MemoryAdapter();
-};
-
-export const timerDb = await createDbAdapter();
+export { dbAdapter as timerDb };
