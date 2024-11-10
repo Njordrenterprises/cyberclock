@@ -17,7 +17,7 @@ RUN bun install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application with Vinxi
 RUN bun run build
 
 # Production stage
@@ -28,12 +28,12 @@ WORKDIR /app
 # Install SQLite runtime
 RUN apt-get update && apt-get install -y \
     sqlite3 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy built assets from builder
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./
+# Copy Vinxi build output
 COPY --from=builder /app/.output ./.output
+COPY --from=builder /app/package.json ./
 
 # Set environment variables
 ENV HOST=0.0.0.0
@@ -51,5 +51,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Start using production mode
+# Start using Vinxi
 CMD ["bun", "run", "start"]
