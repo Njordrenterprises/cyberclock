@@ -1,16 +1,37 @@
-import { Component } from 'solid-js';
+import { Component, createSignal, onMount, onCleanup } from 'solid-js';
 import styles from './Footer.module.css';
 
 const Footer: Component = () => {
+  const startTime = new Date();
+  const [uptime, setUptime] = createSignal('0:00:00');
+
+  const calculateUptime = () => {
+    const now = new Date();
+    const diff = now.getTime() - startTime.getTime();
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  let timer: number;
+
+  onMount(() => {
+    timer = window.setInterval(() => {
+      setUptime(calculateUptime());
+    }, 1000);
+  });
+
+  onCleanup(() => {
+    clearInterval(timer);
+  });
+
   return (
     <footer class={styles.footer}>
       <div class={styles.content}>
-        <span class={styles.copyright}>CYBER CLOCK © {new Date().getFullYear()}</span>
-        <div class={styles.links}>
-          <a href="/privacy" class={styles.link}>PRIVACY</a>
-          <a href="/terms" class={styles.link}>TERMS</a>
-          <a href="/support" class={styles.link}>SUPPORT</a>
-        </div>
+        TIME ONLINE: {uptime()}
       </div>
     </footer>
   );

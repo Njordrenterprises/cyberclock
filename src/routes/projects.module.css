@@ -1,5 +1,13 @@
 @import './shared.module.css';
 
 .projectsContainer {
-  composes: container;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--neon-blue);
+  border-radius: 4px;
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 800px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
 }

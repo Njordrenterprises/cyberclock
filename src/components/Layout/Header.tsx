@@ -6,11 +6,6 @@ const Header: Component = () => {
   return (
     <header class={styles.header}>
       <GlitchText text="CYBER CLOCK" />
-      <nav class={styles.nav}>
-        <a href="/projects" class={styles.link}>Projects</a>
-        <a href="/team" class={styles.link}>Team</a>
-        <a href="/stats" class={styles.link}>Stats</a>
-      </nav>
     </header>
   );
 };
