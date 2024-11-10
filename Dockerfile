@@ -17,7 +17,7 @@ RUN bun install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Build the application with Vinxi
+# Build the application
 RUN bun run build
 
 # Production stage
@@ -25,13 +25,13 @@ FROM oven/bun:1.1.34-slim
 
 WORKDIR /app
 
-# Install SQLite runtime
+# Install SQLite runtime and curl for healthcheck
 RUN apt-get update && apt-get install -y \
     sqlite3 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Vinxi build output
+# Copy built assets from builder
 COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/package.json ./
 
