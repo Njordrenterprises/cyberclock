@@ -25,10 +25,9 @@ FROM oven/bun:1.1.34-slim
 
 WORKDIR /app
 
-# Install SQLite runtime and curl for healthcheck
+# Install SQLite runtime
 RUN apt-get update && apt-get install -y \
     sqlite3 \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy built assets from builder
@@ -40,16 +39,12 @@ ENV HOST=0.0.0.0
 ENV PORT=8000
 ENV NODE_ENV=production
 
-# Create volume for SQLite database
-VOLUME /app/data
-RUN mkdir -p /app/data
+# Create data directory for SQLite
+RUN mkdir -p /app/data && \
+    chown -R bun:bun /app/data
 
 # Expose port
 EXPOSE 8000
-
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
 
 # Start using Vinxi
 CMD ["bun", "run", "start"]
