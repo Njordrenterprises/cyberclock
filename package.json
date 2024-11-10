@@ -19,5 +19,8 @@
   },
   "trustedDependencies": [
     "@parcel/watcher"
-  ]
+  ],
+  "devDependencies": {
+    "bun-types": "^1.1.34"
+  }
 }

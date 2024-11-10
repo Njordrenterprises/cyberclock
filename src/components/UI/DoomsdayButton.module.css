@@ -83,6 +83,13 @@
   100% { opacity: 1; }
 }
 
+@keyframes ringPulse {
+  0% { border-color: #ff003c; }
+  50% { border-color: #00ff41; }
+  100% { border-color: #ff003c; }
+  100% { opacity: 1; }
+}
+
 @media (max-width: 500px) {
   .doomsdayButton {
     width: 200px;
