@@ -19,6 +19,31 @@ class MemoryAdapter implements DbAdapter {
   private store: Map<number, TimeEntry> = new Map();
   private lastId = 0;
 
+  constructor() {
+    this.initializeFromStorage();
+  }
+
+  private initializeFromStorage(): void {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('timerEntries');
+      if (stored) {
+        const entries = JSON.parse(stored);
+        entries.forEach(([id, entry]: [number, TimeEntry]) => {
+          this.store.set(id, entry);
+          this.lastId = Math.max(this.lastId, id);
+        });
+      }
+    }
+  }
+
+  private persistToStorage(): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('timerEntries', 
+        JSON.stringify(Array.from(this.store.entries()))
+      );
+    }
+  }
+
   startTimer(): number {
     this.lastId++;
     const entry: TimeEntry = {
@@ -27,6 +52,7 @@ class MemoryAdapter implements DbAdapter {
       created_at: Math.floor(Date.now() / 1000)
     };
     this.store.set(this.lastId, entry);
+    this.persistToStorage();
     return this.lastId;
   }
 
@@ -37,6 +63,7 @@ class MemoryAdapter implements DbAdapter {
       entry.end_time = end_time;
       entry.duration = end_time - entry.start_time;
       this.store.set(id, entry);
+      this.persistToStorage();
     }
   }
 
