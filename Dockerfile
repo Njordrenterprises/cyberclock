@@ -30,9 +30,12 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy package files and install production dependencies
+COPY package.json bun.lockb ./
+RUN bun install --production --frozen-lockfile
+
 # Copy built assets from builder
 COPY --from=builder /app/.output ./.output
-COPY --from=builder /app/package.json ./
 
 # Set environment variables
 ENV HOST=0.0.0.0
@@ -46,5 +49,5 @@ RUN mkdir -p /app/data && \
 # Expose port
 EXPOSE 8000
 
-# Start using Vinxi
+# Start using bun
 CMD ["bun", "run", "start"]
