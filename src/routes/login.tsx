@@ -22,7 +22,7 @@ export default function Login() {
       
       <Show
         when={!authState().isLoading}
-        fallback={null}
+        fallback={<div class={styles.loading}>Loading...</div>}
       >
         <main class={styles.mainContent}>
           <div class={styles.authContainer}>

@@ -24,55 +24,75 @@ export const [authState, setAuthState] = createSignal<AuthState>({
 export const [authError, setAuthError] = createSignal<string | null>(null)
 
 // Initialize auth state
-supabase.auth.getSession().then(({ data: { session }, error }) => {
-  console.log('Auth init:', { session, error })
-  if (error) {
+async function initializeAuth() {
+  try {
+    const { data, error } = await supabase.auth.getSession()
+    console.log('Auth init:', { session: data.session, error })
+    if (error) {
+      setAuthState(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        error: error.message 
+      }))
+      return
+    }
+    
+    if (data.session) {
+      await checkAndSetAdminRole(data.session.user)
+      setAuthState(prev => ({ 
+        ...prev, 
+        session: data.session, 
+        user: data.session.user,
+        isLoading: false 
+      }))
+    } else {
+      setAuthState(prev => ({ 
+        ...prev, 
+        isLoading: false 
+      }))
+    }
+  } catch (error) {
+    console.error('Auth init error:', error)
     setAuthState(prev => ({ 
       ...prev, 
       isLoading: false, 
-      error: error.message 
+      error: (error as Error).message 
     }))
-    return
   }
-  
-  if (session) {
-    checkAndSetAdminRole(session.user)
-  }
-  
-  setAuthState(prev => ({ 
-    ...prev, 
-    session, 
-    user: session?.user ?? null, 
-    isLoading: false 
-  }))
-}).catch(error => {
-  console.error('Auth init error:', error)
-  setAuthState(prev => ({ 
-    ...prev, 
-    isLoading: false, 
-    error: error.message 
-  }))
-})
+}
 
 // Listen for auth changes
 supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+  console.log('Auth state change:', event, session)
   if (session) {
     await checkAndSetAdminRole(session.user)
   }
   setAuthState(prev => ({ ...prev, session, user: session?.user ?? null }))
 })
 
+// Function to check and set admin role
 async function checkAndSetAdminRole(user: User): Promise<void> {
-  const { data, error } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user.id)
-    .single()
+  try {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single()
 
-  if (!error && data) {
-    setAuthState(prev => ({ ...prev, isAdmin: data.role === 'admin' }))
+    if (!error && data) {
+      setAuthState(prev => ({ ...prev, isAdmin: data.role === 'admin' }))
+    } else {
+      console.warn('Failed to fetch user role:', error?.message)
+      setAuthState(prev => ({ ...prev, isAdmin: false }))
+    }
+  } catch (error) {
+    console.error('Error fetching user role:', error)
+    setAuthState(prev => ({ ...prev, isAdmin: false }))
   }
 }
+
+// Initialize authentication on store load
+initializeAuth()
 
 export async function signInWithEmail(
   email: string, 
@@ -80,15 +100,34 @@ export async function signInWithEmail(
 ): Promise<{ data: { user: User | null; session: Session | null } | null; error: AuthError | null }> {
   setAuthError(null)
   try {
+    console.log('Attempting signInWithPassword...')
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     })
     
-    if (error) throw error
+    console.log('Auth response:', { data, error })
+    
+    if (error) {
+      console.error('Auth error:', error)
+      throw error
+    }
+    
+    if (data.session) {
+      console.log('Setting auth state...')
+      await checkAndSetAdminRole(data.session.user)
+      setAuthState(prev => ({
+        ...prev,
+        user: data.session.user,
+        session: data.session,
+        isLoading: false,
+        error: null
+      }))
+    }
     
     return { data, error: null }
   } catch (error) {
+    console.error('Caught error during sign-in:', error)
     const authError = error as AuthError
     setAuthError(authError.message)
     return { data: null, error: authError }

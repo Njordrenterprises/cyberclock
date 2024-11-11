@@ -11,14 +11,14 @@ const ProtectedRoute = (props: { children: any }) => {
   
   createEffect(() => {
     if (!authState().isLoading && !authState().user) {
-      navigate('/', { replace: true });
+      navigate('/login', { replace: true });
     }
   });
 
   return (
     <Show 
       when={!authState().isLoading && authState().user}
-      fallback={null}
+      fallback={<div class="loading">Checking authentication...</div>}
     >
       {props.children}
     </Show>
@@ -41,7 +41,7 @@ export default function App() {
       root={props => (
         <MetaProvider>
           <Title>CYBER CLOCK</Title>
-          <Suspense fallback={null}>
+          <Suspense fallback={<div class="loading">Loading...</div>}>
             <AppRoot>
               {props.children}
             </AppRoot>

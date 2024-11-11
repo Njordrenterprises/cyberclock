@@ -1,34 +1,47 @@
-import { createSignal, Show } from 'solid-js'
-import { signInWithEmail, signUp, authError, setAuthError } from '~/stores/auth.store'
-import styles from './AuthForm.module.css'
+import { Component, createSignal, Show } from 'solid-js';
+import { useNavigate } from '@solidjs/router';
+import { signInWithEmail, signUp, authError, setAuthError } from '~/stores/auth.store';
+import styles from './AuthForm.module.css';
 
-export default function AuthForm() {
-  const [isSignUp, setIsSignUp] = createSignal(false)
-  const [loading, setLoading] = createSignal(false)
-  const [email, setEmail] = createSignal('')
-  const [password, setPassword] = createSignal('')
+const AuthForm: Component = () => {
+  const navigate = useNavigate();
+  const [isSignUp, setIsSignUp] = createSignal(false);
+  const [loading, setLoading] = createSignal(false);
+  const [email, setEmail] = createSignal('');
+  const [password, setPassword] = createSignal('');
 
   const handleSubmit = async (e: Event) => {
-    e.preventDefault()
-    setLoading(true)
-    setAuthError(null)
+    e.preventDefault();
+    setLoading(true);
+    setAuthError(null);
 
     try {
       if (isSignUp()) {
-        const { error } = await signUp(email(), password())
+        const { error } = await signUp(email(), password());
         if (!error) {
-          // Show confirmation message but don't redirect
-          setEmail('')
-          setPassword('')
-          setIsSignUp(false)
+          setEmail('');
+          setPassword('');
+          setIsSignUp(false);
+          navigate('/', { replace: true });
         }
       } else {
-        await signInWithEmail(email(), password())
+        console.log('Attempting login...');
+        const { data, error } = await signInWithEmail(email(), password());
+        console.log('Login response:', { data, error });
+        
+        if (!error && data?.session) {
+          console.log('Login successful, navigating...');
+          navigate('/', { replace: true });
+        } else {
+          console.warn('Login failed:', error?.message);
+        }
       }
+    } catch (err) {
+      console.error('Auth error:', err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div class={styles.container}>
@@ -85,5 +98,7 @@ export default function AuthForm() {
         </button>
       </form>
     </div>
-  )
-}
+  );
+};
+
+export default AuthForm;
