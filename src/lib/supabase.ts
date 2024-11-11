@@ -12,6 +12,7 @@ export const isSupabaseInitialized = Boolean(supabaseUrl && supabaseKey)
 const dummyClient = {
   auth: {
     getSession: () => Promise.resolve(null),
+    signInWithPassword: () => Promise.resolve({ data: null, error: null }),
     signOut: () => Promise.resolve({ error: null }),
     onAuthStateChange: () => ({ data: null, error: null, subscription: { unsubscribe: () => {} } })
   }
@@ -23,7 +24,8 @@ export const supabase = isSupabaseInitialized
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true
+        detectSessionInUrl: true,
+        flowType: 'pkce'
       }
     })
   : dummyClient

@@ -1,12 +1,10 @@
 import { Component, createSignal } from 'solid-js';
-import { useNavigate } from '@solidjs/router';
 import { signOut } from '~/stores/auth.store';
 import { isOnline } from '~/stores/syncStore';
 import styles from './AuthControls.module.css';
 
 const AuthControls: Component = () => {
   const [isLoading, setIsLoading] = createSignal(false);
-  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     if (isLoading()) return;
@@ -18,7 +16,8 @@ const AuthControls: Component = () => {
       }
       
       await signOut();
-      navigate('/disconnect', { replace: true });
+      // Force a full page refresh to ensure clean state
+      window.location.href = '/disconnect';
     } catch (error) {
       console.error('Sign out error:', error);
     } finally {
