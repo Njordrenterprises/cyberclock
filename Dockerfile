@@ -37,20 +37,30 @@ RUN bun install --production --frozen-lockfile
 # Copy built assets from builder
 COPY --from=builder /app/.output ./.output
 
-# Set environment variables
+# Set runtime environment variables
 ENV HOST=0.0.0.0
 ENV PORT=8000
 ENV NODE_ENV=production
-ENV SUPABASE_URL=
-ENV SUPABASE_ANON_KEY=
-ENV SITE_URL=
 
-# Create data directory for SQLite
+# Create data directory for SQLite with proper permissions
 RUN mkdir -p /app/data && \
     chown -R bun:bun /app/data
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/health || exit 1
+
+# Create entrypoint script
+RUN echo '#!/bin/sh\n\
+if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then\n\
+    echo "Warning: Supabase environment variables not set. Some features may be limited."\n\
+fi\n\
+exec bun run start\n\
+' > /app/docker-entrypoint.sh && \
+    chmod +x /app/docker-entrypoint.sh
 
 # Expose port
 EXPOSE 8000
 
-# Start using bun
-CMD ["bun", "run", "start"]
+# Start using entrypoint script
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
