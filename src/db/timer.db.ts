@@ -1,17 +1,23 @@
 // Type definitions
 interface TimeEntry {
   id?: number;
+  member_id?: string;
+  project_id?: string;
   start_time: number;
-  end_time?: number;
-  duration?: number;
+  end_time?: number | null;
+  duration?: number | null;
+  synced?: boolean;
   created_at?: number;
+  updated_at?: number;
 }
 
 interface DbAdapter {
-  startTimer(): number;
+  startTimer(memberId?: string, projectId?: string): number;
   stopTimer(id: number): void;
   getLastSession(): TimeEntry | null;
   getTotalTime(): { total: number } | null;
+  getUnsyncedEntries(): TimeEntry[];
+  markAsSynced(id: number): void;
 }
 
 // Memory store for development and client-side
@@ -52,12 +58,17 @@ class MemoryAdapter implements DbAdapter {
     }
   }
 
-  startTimer(): number {
+  startTimer(memberId?: string, projectId?: string): number {
     this.lastId++;
+    const now = Date.now();
     const entry: TimeEntry = {
       id: this.lastId,
-      start_time: Date.now(),
-      created_at: Math.floor(Date.now() / 1000)
+      member_id: memberId,
+      project_id: projectId,
+      start_time: now,
+      created_at: Math.floor(now / 1000),
+      updated_at: Math.floor(now / 1000),
+      synced: false
     };
     this.store.set(this.lastId, entry);
     this.persistToStorage();
@@ -67,9 +78,11 @@ class MemoryAdapter implements DbAdapter {
   stopTimer(id: number): void {
     const entry = this.store.get(id);
     if (entry) {
-      const end_time = Date.now();
-      entry.end_time = end_time;
-      entry.duration = end_time - entry.start_time;
+      const now = Date.now();
+      entry.end_time = now;
+      entry.duration = now - entry.start_time;
+      entry.updated_at = Math.floor(now / 1000);
+      entry.synced = false;
       this.store.set(id, entry);
       this.persistToStorage();
     }
@@ -84,6 +97,21 @@ class MemoryAdapter implements DbAdapter {
     const total = Array.from(this.store.values())
       .reduce((acc, entry) => acc + (entry.duration || 0), 0);
     return { total };
+  }
+
+  getUnsyncedEntries(): TimeEntry[] {
+    return Array.from(this.store.values())
+      .filter(entry => !entry.synced);
+  }
+
+  markAsSynced(id: number): void {
+    const entry = this.store.get(id);
+    if (entry) {
+      entry.synced = true;
+      entry.updated_at = Math.floor(Date.now() / 1000);
+      this.store.set(id, entry);
+      this.persistToStorage();
+    }
   }
 }
 
@@ -104,28 +132,37 @@ if (typeof process !== 'undefined' && process.versions?.bun) {
     db.run(`
       CREATE TABLE IF NOT EXISTS time_entries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        member_id TEXT,
+        project_id TEXT,
         start_time INTEGER NOT NULL,
         end_time INTEGER,
         duration INTEGER,
-        created_at INTEGER DEFAULT (unixepoch())
+        synced BOOLEAN DEFAULT 0,
+        created_at INTEGER DEFAULT (unixepoch()),
+        updated_at INTEGER DEFAULT (unixepoch())
       )
     `);
 
     dbAdapter = {
-      startTimer: () => {
+      startTimer: (memberId?: string, projectId?: string) => {
+        const now = Date.now();
         return db.run(
-          'INSERT INTO time_entries (start_time) VALUES (?)',
-          [Date.now()]
+          `INSERT INTO time_entries (
+            member_id, project_id, start_time, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?)`,
+          [memberId, projectId, now, Math.floor(now / 1000), Math.floor(now / 1000)]
         ).lastInsertRowId;
       },
       stopTimer: (id: number) => {
-        const end_time = Date.now();
+        const now = Date.now();
         db.run(
           `UPDATE time_entries 
-           SET end_time = ?, 
-               duration = ? - start_time 
+           SET end_time = ?,
+               duration = ? - start_time,
+               updated_at = ?,
+               synced = 0
            WHERE id = ?`,
-          [end_time, end_time, id]
+          [now, now, Math.floor(now / 1000), id]
         );
       },
       getLastSession: () => {
@@ -137,6 +174,18 @@ if (typeof process !== 'undefined' && process.versions?.bun) {
         return db.query(
           'SELECT SUM(duration) as total FROM time_entries'
         ).get() as { total: number } | null;
+      },
+      getUnsyncedEntries: () => {
+        return db.query(
+          'SELECT * FROM time_entries WHERE synced = 0'
+        ).all() as TimeEntry[];
+      },
+      markAsSynced: (id: number) => {
+        const now = Math.floor(Date.now() / 1000);
+        db.run(
+          'UPDATE time_entries SET synced = 1, updated_at = ? WHERE id = ?',
+          [now, id]
+        );
       }
     };
   } catch (error) {

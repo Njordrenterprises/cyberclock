@@ -5,8 +5,8 @@
 
 .doomsdayButton {
   position: relative;
-  width: 300px;
-  height: 300px;
+  width: 345px;
+  height: 345px;
   border: none;
   background: none;
   cursor: pointer;
@@ -18,12 +18,14 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 225px;
-  height: 225px;
-  background: radial-gradient(circle, #ff003c 0%, #800020 100%);
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, #00ff41 0%, #008020 100%);
   border-radius: 50%;
-  box-shadow: 0 0 50px rgba(255, 0, 60, 0.6);
+  box-shadow: 0 0 50px rgba(0, 255, 65, 0.4),
+              0 0 2px #ff003c;
   transition: all 0.3s ease;
+  animation: gentlePulse 2s infinite;
 }
 
 .buttonInner {
@@ -31,11 +33,11 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 195px;
-  height: 195px;
-  background: #ff003c;
+  width: 225px;
+  height: 225px;
+  background: #00ff41;
   border-radius: 50%;
-  border: 6px solid rgba(0, 0, 0, 0.3);
+  border: 6px solid rgba(255, 0, 60, 0.3);
 }
 
 .buttonText {
@@ -43,38 +45,55 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: white;
+  color: black;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
   white-space: nowrap;
+  font-weight: bold;
 }
 
 .buttonWarning {
   position: absolute;
-  bottom: -40px;
+  bottom: -45px;
   left: 50%;
   transform: translateX(-50%);
-  color: #ff003c;
+  color: #00ff41;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   white-space: nowrap;
 }
 
 .active .buttonCore {
-  animation: pulse 1s infinite, electricity 0.5s infinite;
-  background: radial-gradient(circle, #00ff41 0%, #008020 100%);
+  animation: pulse 1s infinite;
+  background: radial-gradient(circle, #ff003c 0%, #800020 100%);
+  box-shadow: 0 0 50px rgba(255, 0, 60, 0.6);
+}
+
+.active .buttonInner {
+  background: #ff003c;
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.active .buttonText {
+  color: white;
 }
 
 .active .buttonWarning {
-  color: #00ff41;
+  color: #ff003c;
   animation: textFlicker 0.3s infinite;
 }
 
+@keyframes gentlePulse {
+  0% { box-shadow: 0 0 50px rgba(0, 255, 65, 0.4), 0 0 2px #ff003c; }
+  50% { box-shadow: 0 0 70px rgba(0, 255, 65, 0.6), 0 0 2px #ff003c; }
+  100% { box-shadow: 0 0 50px rgba(0, 255, 65, 0.4), 0 0 2px #ff003c; }
+}
+
 @keyframes pulse {
-  0% { box-shadow: 0 0 50px rgba(0, 255, 65, 0.6); }
-  50% { box-shadow: 0 0 100px rgba(0, 255, 65, 0.8); }
-  100% { box-shadow: 0 0 50px rgba(0, 255, 65, 0.6); }
+  0% { box-shadow: 0 0 50px rgba(255, 0, 60, 0.6); }
+  50% { box-shadow: 0 0 100px rgba(255, 0, 60, 0.8); }
+  100% { box-shadow: 0 0 50px rgba(255, 0, 60, 0.6); }
 }
 
 @keyframes textFlicker {
@@ -83,43 +102,30 @@
   100% { opacity: 1; }
 }
 
-@keyframes ringPulse {
-  0% { border-color: #ff003c; }
-  50% { border-color: #00ff41; }
-  100% { border-color: #ff003c; }
-  100% { opacity: 1; }
-}
-
 @media (max-width: 500px) {
   .doomsdayButton {
-    width: 200px;
-    height: 200px;
+    width: 230px;
+    height: 230px;
   }
   
   .buttonCore {
-    width: 150px;
-    height: 150px;
+    width: 172px;
+    height: 172px;
   }
   
   .buttonInner {
-    width: 130px;
-    height: 130px;
+    width: 150px;
+    height: 150px;
     border-width: 4px;
   }
   
   .buttonText {
-    font-size: 1.5rem;
+    font-size: 1.7rem;
   }
   
   .buttonWarning {
-    font-size: 1rem;
-    bottom: -30px;
-  }
-  
-  .buttonRing::before,
-  .buttonRing::after {
-    font-size: 18px;
-    transform-origin: 100px 0;
+    font-size: 1.2rem;
+    bottom: -35px;
   }
 }
 

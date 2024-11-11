@@ -1,0 +1,26 @@
+.authControlsContainer {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 100;
+}
+
+.authButton {
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid var(--neon-red);
+  color: var(--neon-red);
+  padding: 0.8rem 1.5rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.authButton:hover {
+  background: var(--neon-red);
+  color: black;
+  box-shadow: 0 0 20px var(--neon-red);
+}
