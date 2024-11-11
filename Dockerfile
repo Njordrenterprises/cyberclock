@@ -41,6 +41,9 @@ COPY --from=builder /app/.output ./.output
 ENV HOST=0.0.0.0
 ENV PORT=8000
 ENV NODE_ENV=production
+ENV SUPABASE_URL=
+ENV SUPABASE_ANON_KEY=
+ENV SITE_URL=
 
 # Create data directory for SQLite
 RUN mkdir -p /app/data && \
