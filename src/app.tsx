@@ -1,5 +1,5 @@
 import { MetaProvider, Title } from "@solidjs/meta";
-import { Router, Navigate, useNavigate } from "@solidjs/router";
+import { Router, useNavigate } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense, Show, createEffect } from "solid-js";
 import { authState } from "~/stores/auth.store";
@@ -11,7 +11,7 @@ const ProtectedRoute = (props: { children: any }) => {
   
   createEffect(() => {
     if (!authState().isLoading && !authState().user) {
-      navigate('/auth', { replace: true });
+      navigate('/', { replace: true });
     }
   });
 

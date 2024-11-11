@@ -13,7 +13,7 @@ export default function Disconnect() {
   });
 
   const handleReconnect = () => {
-    navigate('/auth', { replace: true });
+    navigate('/', { replace: true });
   };
 
   return (
