@@ -18,9 +18,7 @@ const AuthControls: Component = () => {
       }
       
       await signOut();
-      // Wait for state to clear
-      await new Promise(resolve => setTimeout(resolve, 100));
-      navigate('/auth', { replace: true });
+      navigate('/disconnect', { replace: true });
     } catch (error) {
       console.error('Sign out error:', error);
     } finally {

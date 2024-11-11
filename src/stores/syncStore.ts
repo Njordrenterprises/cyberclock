@@ -5,15 +5,16 @@ import type { Database } from '../types/supabase.types'
 
 type TimeEntry = Database['public']['Tables']['time_entries']['Row']
 
-export const [isOnline, setIsOnline] = createSignal(navigator.onLine)
-export const [isSyncing, setIsSyncing] = createSignal(false)
+// Export the isOnline signal
+export const [isOnline, setIsOnline] = createSignal(true)
 
-// Listen for online/offline events
-window.addEventListener('online', () => {
-  setIsOnline(true)
-  syncTimeEntries()
-})
-window.addEventListener('offline', () => setIsOnline(false))
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => setIsOnline(true))
+  window.addEventListener('offline', () => setIsOnline(false))
+  setIsOnline(navigator.onLine)
+}
+
+export const [isSyncing, setIsSyncing] = createSignal(false)
 
 async function syncTimeEntries() {
   if (!isOnline() || isSyncing()) return

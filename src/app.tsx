@@ -17,7 +17,7 @@ const ProtectedRoute = (props: { children: any }) => {
 
   return (
     <Show 
-      when={authState().user} 
+      when={!authState().isLoading && authState().user}
       fallback={null}
     >
       {props.children}
@@ -42,7 +42,9 @@ export default function App() {
         <MetaProvider>
           <Title>CYBER CLOCK</Title>
           <Suspense fallback={null}>
-            <AppRoot>{props.children}</AppRoot>
+            <AppRoot>
+              {props.children}
+            </AppRoot>
           </Suspense>
         </MetaProvider>
       )}
