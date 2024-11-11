@@ -10,23 +10,48 @@ interface AuthState {
   session: Session | null
   isAdmin: boolean
   isLoading: boolean
+  error: string | null
 }
 
 export const [authState, setAuthState] = createSignal<AuthState>({
   user: null,
   session: null,
   isAdmin: false,
-  isLoading: true
+  isLoading: true,
+  error: null
 })
 
 export const [authError, setAuthError] = createSignal<string | null>(null)
 
 // Initialize auth state
-supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
+supabase.auth.getSession().then(({ data: { session }, error }) => {
+  console.log('Auth init:', { session, error })
+  if (error) {
+    setAuthState(prev => ({ 
+      ...prev, 
+      isLoading: false, 
+      error: error.message 
+    }))
+    return
+  }
+  
   if (session) {
     checkAndSetAdminRole(session.user)
   }
-  setAuthState(prev => ({ ...prev, session, user: session?.user ?? null, isLoading: false }))
+  
+  setAuthState(prev => ({ 
+    ...prev, 
+    session, 
+    user: session?.user ?? null, 
+    isLoading: false 
+  }))
+}).catch(error => {
+  console.error('Auth init error:', error)
+  setAuthState(prev => ({ 
+    ...prev, 
+    isLoading: false, 
+    error: error.message 
+  }))
 })
 
 // Listen for auth changes
@@ -119,7 +144,8 @@ export async function signOut(): Promise<void> {
       user: null,
       session: null,
       isAdmin: false,
-      isLoading: false
+      isLoading: false,
+      error: null
     })
     setAuthError(null)
   } catch (error) {
