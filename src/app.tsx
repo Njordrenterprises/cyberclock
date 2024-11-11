@@ -25,6 +25,16 @@ const ProtectedRoute = (props: { children: any }) => {
   );
 };
 
+const AppRoot = (props: { children: any }) => {
+  return (
+    <>
+      <div class="grid-background" />
+      <div class="scanlines" />
+      {props.children}
+    </>
+  );
+};
+
 export default function App() {
   return (
     <Router
@@ -32,7 +42,7 @@ export default function App() {
         <MetaProvider>
           <Title>CYBER CLOCK</Title>
           <Suspense fallback={null}>
-            {props.children}
+            <AppRoot>{props.children}</AppRoot>
           </Suspense>
         </MetaProvider>
       )}

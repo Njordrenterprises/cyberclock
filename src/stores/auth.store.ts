@@ -108,6 +108,22 @@ export async function signUp(
 }
 
 export async function signOut(): Promise<void> {
-  const { error } = await supabase.auth.signOut()
-  if (error) setAuthError(error.message)
+  try {
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      setAuthError(error.message)
+      return
+    }
+    // Clear state before navigation
+    setAuthState({
+      user: null,
+      session: null,
+      isAdmin: false,
+      isLoading: false
+    })
+    setAuthError(null)
+  } catch (error) {
+    console.error('Sign out error:', error)
+    setAuthError('Error during sign out')
+  }
 }

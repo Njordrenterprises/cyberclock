@@ -1,14 +1,31 @@
-import { Component } from 'solid-js';
+import { Component, createSignal } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import { signOut } from '~/stores/auth.store';
+import { isOnline } from '~/stores/syncStore';
 import styles from './AuthControls.module.css';
 
 const AuthControls: Component = () => {
+  const [isLoading, setIsLoading] = createSignal(false);
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/auth', { replace: true });
+    if (isLoading()) return;
+    
+    setIsLoading(true);
+    try {
+      if (!isOnline()) {
+        throw new Error('Cannot sign out while offline');
+      }
+      
+      await signOut();
+      // Wait for state to clear
+      await new Promise(resolve => setTimeout(resolve, 100));
+      navigate('/auth', { replace: true });
+    } catch (error) {
+      console.error('Sign out error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -16,8 +33,9 @@ const AuthControls: Component = () => {
       <button 
         onClick={handleSignOut}
         class={styles.authButton}
+        disabled={isLoading()}
       >
-        DISCONNECT
+        {isLoading() ? 'DISCONNECTING...' : 'DISCONNECT'}
       </button>
     </div>
   );

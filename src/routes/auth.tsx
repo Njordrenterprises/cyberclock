@@ -19,16 +19,16 @@ export default function Auth() {
   });
 
   return (
-    <>
+    <div class={styles.authRoot}>
       <Title>CYBER CLOCK | Access Terminal</Title>
-      <div class="grid-background"></div>
+      <div class={`${styles.gridBackground} grid-background`} />
       <Header />
-      <main>
+      <main class={styles.mainContent}>
         <div class={styles.authContainer}>
           <AuthForm />
         </div>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
