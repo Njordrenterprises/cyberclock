@@ -67,3 +67,24 @@ p {
   opacity: 1;
   transition: opacity 0.3s ease-in-out;
 }
+
+.loading-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dark-bg);
+}
+
+.loading {
+  color: var(--neon-green);
+  font-family: 'Share Tech Mono', monospace;
+  text-transform: uppercase;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}

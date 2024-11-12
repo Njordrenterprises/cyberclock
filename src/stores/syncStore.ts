@@ -1,8 +1,8 @@
 import { createSignal, createEffect, onCleanup } from 'solid-js'
 import { isServer } from 'solid-js/web'
-import { supabase } from '../lib/supabase'
-import { timerDb } from '../db/timer.db'
-import { authState } from './auth.store'
+import { supabase } from '~/lib/supabase'
+import { timerDb } from '~/db/timer.db'
+import { authState } from '~/stores/auth.store'
 import type { Database } from '../types/supabase.types'
 
 type TimeEntry = Database['public']['Tables']['time_entries']['Row']

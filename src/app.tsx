@@ -1,31 +1,46 @@
 import { MetaProvider, Title } from "@solidjs/meta";
 import { Router, useNavigate } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { Suspense, Show, createEffect } from "solid-js";
-import { authState } from "~/stores/auth.store";
+import { Suspense, Show, createEffect, type ParentComponent } from "solid-js";
+import { authState } from "./stores/auth.store";
 import "./app.css";
 import "./styles/theme.css";
 
-const ProtectedRoute = (props: { children: any }) => {
+interface ProtectedRouteProps {
+  children: any;
+}
+
+const ProtectedRoute: ParentComponent<ProtectedRouteProps> = (props) => {
   const navigate = useNavigate();
   
   createEffect(() => {
-    if (!authState().isLoading && !authState().user) {
+    const auth = authState();
+    if (auth.initialized && !auth.isLoading && !auth.user) {
+      console.log('No user found, redirecting to login');
       navigate('/login', { replace: true });
     }
   });
 
   return (
     <Show 
-      when={!authState().isLoading && authState().user}
-      fallback={<div class="loading">Checking authentication...</div>}
+      when={authState().initialized && !authState().isLoading}
+      fallback={
+        <div class="loading-container">
+          <div class="loading">Checking authentication...</div>
+        </div>
+      }
     >
-      {props.children}
+      <Show
+        when={authState().user}
+        fallback={null}
+      >
+        {props.children}
+      </Show>
     </Show>
   );
 };
 
-const AppRoot = (props: { children: any }) => {
+const AppRoot: ParentComponent = (props) => {
   return (
     <>
       <div class="grid-background" />

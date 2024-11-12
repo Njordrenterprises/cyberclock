@@ -10,6 +10,7 @@ export default createHandler(() => (
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
           <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+          <meta http-equiv="Content-Type" content="text/javascript; charset=utf-8" />
           {assets}
         </head>
         <body>

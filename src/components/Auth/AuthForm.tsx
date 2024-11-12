@@ -1,6 +1,7 @@
 import { Component, createSignal, Show } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import { signInWithEmail, signUp, authError, setAuthError } from '~/stores/auth.store';
+import { isServer } from 'solid-js/web';
 import styles from './AuthForm.module.css';
 
 const AuthForm: Component = () => {
@@ -12,6 +13,8 @@ const AuthForm: Component = () => {
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
+    if (isServer) return;
+    
     setLoading(true);
     setAuthError(null);
 
@@ -25,15 +28,9 @@ const AuthForm: Component = () => {
           navigate('/', { replace: true });
         }
       } else {
-        console.log('Attempting login...');
         const { data, error } = await signInWithEmail(email(), password());
-        console.log('Login response:', { data, error });
-        
         if (!error && data?.session) {
-          console.log('Login successful, navigating...');
           navigate('/', { replace: true });
-        } else {
-          console.warn('Login failed:', error?.message);
         }
       }
     } catch (err) {
@@ -46,54 +43,47 @@ const AuthForm: Component = () => {
   return (
     <div class={styles.container}>
       <form class={styles.form} onSubmit={handleSubmit}>
-        <h2 class={styles.title}>
-          {isSignUp() ? 'CREATE ACCOUNT' : 'ACCESS TERMINAL'}
-        </h2>
-        
+        <h2 class={styles.title}>ACCESS TERMINAL</h2>
         <div class={styles.inputGroup}>
           <input
             type="email"
-            value={email()}
-            onInput={(e) => setEmail(e.currentTarget.value)}
             placeholder="ENTER EMAIL"
             required
-            disabled={loading()}
             class={styles.input}
+            value={isServer ? '' : email()}
+            onInput={!isServer ? (e) => setEmail(e.currentTarget.value) : undefined}
+            disabled={loading()}
           />
         </div>
-
         <div class={styles.inputGroup}>
           <input
             type="password"
-            value={password()}
-            onInput={(e) => setPassword(e.currentTarget.value)}
             placeholder="ENTER PASSWORD"
             required
-            disabled={loading()}
             class={styles.input}
+            value={isServer ? '' : password()}
+            onInput={!isServer ? (e) => setPassword(e.currentTarget.value) : undefined}
+            disabled={loading()}
           />
         </div>
-
-        <Show when={authError()}>
-          <div class={styles.error}>{authError()}</div>
+        <Show when={!isServer && authError()}>
+          <div class={styles.error} role="alert">{authError()}</div>
         </Show>
-
         <button 
           type="submit" 
           class={styles.submitButton}
           disabled={loading()}
         >
-          {loading() ? 'PROCESSING...' : isSignUp() ? 'CREATE' : 'CONNECT'}
+          {isServer ? 'CONNECT' : (loading() ? 'PROCESSING...' : (isSignUp() ? 'CREATE' : 'CONNECT'))}
         </button>
-
         <button 
           type="button"
           class={styles.switchMode}
-          onClick={() => setIsSignUp(!isSignUp())}
+          onClick={!isServer ? () => setIsSignUp(!isSignUp()) : undefined}
           disabled={loading()}
         >
           <span class={styles.switchText}>
-            {isSignUp() ? 'EXISTING USER?' : 'CREATE NEW ACCOUNT'}
+            {isServer ? 'CREATE NEW ACCOUNT' : (isSignUp() ? 'EXISTING USER?' : 'CREATE NEW ACCOUNT')}
           </span>
         </button>
       </form>
